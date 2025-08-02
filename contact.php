@@ -7,7 +7,7 @@
       src="https://kit.fontawesome.com/cd0fb7a211.js"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="contact.css" />
+    <link rel="stylesheet" href="conect.css" />
     <title>Document</title>
     <script>
       function data() {
@@ -34,12 +34,12 @@
           <span>CineBook</span>
         </div>
         <ul class="nav-links">
-          <li><a href="index.php" class="active">Home</a></li>
-          <li><a href="offers.php">Offers</a></li>
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="offer.php">Offers</a></li>
           <li><a href="contact.php">Contact</a></li>
         </ul>
         <div class="auth-buttons">
-          <button class="btn-login" onclick="window.location.href='login.php'">
+          <button class="btn-login" onclick="window.location.href='http://localhost/garv/new/index.php'">
             Login
           </button>
           <!-- <button class="btn-signup">Sign Up</button> -->
