@@ -63,7 +63,7 @@
 </head>
 <body>
 
-  <h2>🎟 Booking Summary</h2>
+  <h2>🎟 Offer Booking Summary</h2>
 
   <div class="summary">
     <p><strong>Movie:</strong> <span id="movie"></span></p>
@@ -87,24 +87,24 @@
 
   <script>
     // Retrieve booking data
-const movieName = localStorage.getItem('selectedMovieName') || '—';
-const userData = JSON.parse(localStorage.getItem('bookingUser') || '{}');
-const date = localStorage.getItem('selectedDate') || '—';
-const time = localStorage.getItem('selectedTime') || '—';
-const seats = JSON.parse(localStorage.getItem('selectedSeats') || '[]');
-const pricePerSeat = parseFloat(localStorage.getItem("selectedMoviePrice")) || 0;
-const total = seats.length * pricePerSeat;
+      const movieName = localStorage.getItem('selectedMovieName') || '—';
+      const userData = JSON.parse(localStorage.getItem('bookingUser') || '{}');
+      const date = localStorage.getItem('selectedDate') || '—';
+      const time = localStorage.getItem('selectedTime') || '—';
+      const seats = JSON.parse(localStorage.getItem('selectedSeats') || '[]');
+      const pricePerSeat = parseFloat(localStorage.getItem("selectedMoviePrice")) || 0;
+      const total = seats.length * pricePerSeat;
 
-// Populate fields
-document.getElementById('movie').textContent = movieName;
-document.getElementById('cust-name').textContent = userData.name || '—';
-document.getElementById('cust-phone').textContent = userData.phone || '—';
-document.getElementById('cust-email').textContent = userData.email || '—';
-document.getElementById('date').textContent = date;
-document.getElementById('time').textContent = time;
-document.getElementById('seats').textContent = seats.join(', ') || '—';
-document.getElementById('price').textContent = pricePerSeat.toFixed(2);
-document.getElementById('total').textContent = `Total: ₹${total.toFixed(2)}`;
+      // Populate fields
+      document.getElementById('movie').textContent = movieName;
+      document.getElementById('cust-name').textContent = userData.name || '—';
+      document.getElementById('cust-phone').textContent = userData.phone || '—';
+      document.getElementById('cust-email').textContent = userData.email || '—';
+      document.getElementById('date').textContent = date;
+      document.getElementById('time').textContent = time;
+      document.getElementById('seats').textContent = seats.join(', ') || '—';
+      document.getElementById('price').textContent = pricePerSeat.toFixed(2);
+      document.getElementById('total').textContent = `Total: ₹${total.toFixed(2)}`;
 
     // QR Code Scanner
     function onScanSuccess(decodedText) {
