@@ -205,48 +205,47 @@
       preview.src = "";
     });
   </script>
-  <script>
-    // Load movies from localStorage and display
+<script>
+  function loadMovies() {
+    const movieDisplay = document.getElementById("movieDisplay");
 
-    function loadMovies() {
-      const movieDisplay = document.getElementById("movieDisplay");
+    // Fetch movies from PHP endpoint
+    fetch('addmovie.php?fetch=1')
+      .then(response => response.json())
+      .then(movies => {
+        movieDisplay.innerHTML = "";
 
-      // Fetch movies from PHP endpoint
-      fetch('addmovie.php?fetch=1')
-        .then(response => response.json())
-        .then(movies => {
-          movieDisplay.innerHTML = "";
+        movies.forEach((movie) => {
+          const card = document.createElement("div");
+          card.className = "card m-2";
+          card.style.width = "18rem";
+          card.innerHTML = `
+            <img src="${movie.image}" class="card-img-top" alt="${movie.name}" />
+            <div class="card-body">
+              <h5 class="card-title">${movie.name}</h5>
+              <p class="card-text">Price: ₹${movie.price}</p>
+              <button class="btn btn-primary book-btn">BOOK</button>
+            </div>
+          `;
 
-          movies.forEach((movie) => {
-            const card = document.createElement("div");
-            card.className = "card m-2";
-            card.style.width = "18rem";
-            card.innerHTML = `
-          <img src="${movie.image}" class="card-img-top" alt="${movie.name}" />
-          <div class="card-body">
-            <h5 class="card-title">${movie.name}</h5>
-            <p class="card-text">Price: ₹${movie.price}</p>
-            <button class="btn btn-primary book-btn">BOOK</button>
-          </div>
-        `;
-
-            card.querySelector(".book-btn").addEventListener("click", () => {
-              localStorage.setItem("selectedMoviePrice", movie.price);
-              localStorage.setItem("selectedMovieName", movie.name);
-              window.location.href = "seat.html";
-            });
-
-            movieDisplay.appendChild(card);
+          // ⭐ Save selected movie in localStorage
+         card.querySelector(".book-btn").addEventListener("click", () => {
+            localStorage.setItem("selectedMovieName", movie.name);
+            localStorage.setItem("selectedMoviePrice", movie.price);
+            window.location.href = "seat.html"; 
           });
-        })
-        .catch(error => console.error('Error loading movies:', error));
-    }
 
-    // Call loadMovies when page loads
-    window.addEventListener("DOMContentLoaded", loadMovies);
-  </script>
+
+          movieDisplay.appendChild(card);
+        });
+      })
+      .catch(error => console.error('Error loading movies:', error));
+  }
+
+  window.addEventListener("DOMContentLoaded", loadMovies);
+</script>
+
 </body>
 
 </html>
 
-<!-- <a href="location.php" class="btn btn-primary">BOOK</a> -->
