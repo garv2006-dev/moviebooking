@@ -40,7 +40,7 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == 1) {
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="offer.css" />
+  <link rel="stylesheet" href="./style/offer.css" />
 </head>
 <body>
  <header>
@@ -200,6 +200,28 @@ if (isset($_GET['fetch']) && $_GET['fetch'] == 1) {
 
   loadOffers();
 });
+
+     document.addEventListener("DOMContentLoaded", function () {
+      const authButtons = document.querySelector(".auth-buttons");
+
+     
+      fetch('new/session_check.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            
+            authButtons.innerHTML = `
+              <div class="user-info">
+                <a href="new/logout_page.php" style="text-decoration: none; color: white; font-size: 1.1em; padding: 8px 15px; background-color: #007bff; border-radius: 5px;">
+                  ${data.username}
+                </a>
+              </div>
+            `;
+          }
+         
+        })
+        .catch(error => console.error('Error checking session:', error));
+    });
 
   </script>
 </body>

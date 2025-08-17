@@ -1,6 +1,6 @@
 <?php
 session_start();
-// જો યુઝર લોગિન ન હોય, તો તેને લોગિન પેજ પર મોકલો
+// If the user is not logged in, redirect to login page
 if (!isset($_SESSION['username'])) {
     header("Location: index.php");
     exit();
@@ -55,15 +55,16 @@ $username = $_SESSION['username'];
 <body>
     <div class="container logout-container">
         <h2>Logout Confirmation</h2>
-        <p>તમે <strong><?php echo htmlspecialchars($username); ?></strong> તરીકે લોગિન છો.</p>
+        <p>You are logged in as <strong><?php echo htmlspecialchars($username); ?></strong>.</p>
         
-        <p>શું તમે ખરેખર લોગઆઉટ કરવા માંગો છો?</p>
+        <p>Are you sure you want to log out?</p>
         
-        <a href="logout.php" class="logout-button">હા, લોગઆઉટ કરો</a>
-        <a href="index.html" style="margin-top: 15px;">ના, પાછા જાઓ</a>
+        <a href="logout.php" class="logout-button">Yes, Logout</a>
+        <a href="../index.html" style="margin-top: 15px;">No, Go Back</a>
 
         <div class="security-warning">
-            <strong>મહત્વપૂર્ણ સુરક્ષા નોંધ:</strong> તમારી સુરક્ષા માટે, અમે અહીં તમારો પાસવર્ડ બતાવી શકતા નથી. કોઈપણ સિસ્ટમ જે લોગિન પછી તમારો પાસવર્ડ બતાવે તે સુરક્ષિત નથી.
+            <strong>Important Security Note:</strong> For your safety, we cannot display your password here. 
+            Any system that shows your password after login is not secure.
         </div>
     </div>
 </body>

@@ -7,7 +7,7 @@
       src="https://kit.fontawesome.com/cd0fb7a211.js"
       crossorigin="anonymous"
     ></script>
-    <link rel="stylesheet" href="conect.css" />
+    <link rel="stylesheet" href="./style/conect.css" />
     <title>Document</title>
     <script>
       function data() {
@@ -68,7 +68,7 @@
               <h1 class="md-headin text-grey">+ call</h1>
               <p>+91 7069909314</p>
             </div>
-            <img src="./img/istockphoto-511061090-612x612.jpg" alt="" />
+            <img src="./style/istockphoto-511061090-612x612.jpg" alt="" />
           </div>
           <form onsubmit="data()" class="company-form">
             <h1 class="lg-headin text-grey">CONTECT US</h1>
@@ -190,5 +190,28 @@
         </div>
       </div>
     </footer>
+      <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const authButtons = document.querySelector(".auth-buttons");
+
+      // પાથને સુધારીને 'new/session_check.php' કરવામાં આવ્યો છે
+      fetch('new/session_check.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            // જો યુઝર લોગિન થયેલ હોય, તો તેનું નામ બતાવો જે logout_page.php પર લિંક કરે છે
+            authButtons.innerHTML = `
+              <div class="user-info">
+                <a href="new/logout_page.php" style="text-decoration: none; color: white; font-size: 1.1em; padding: 8px 15px; background-color: #007bff; border-radius: 5px;">
+                  ${data.username}
+                </a>
+              </div>
+            `;
+          }
+          // જો યુઝર લોગિન થયેલ ન હોય, તો મૂળ "Login" બટન જેમ છે તેમ રહેશે.
+        })
+        .catch(error => console.error('Error checking session:', error));
+    });
+  </script>
   </body>
 </html>

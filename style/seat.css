@@ -1,0 +1,130 @@
+.hidden {
+  display: none
+}
+
+.step {
+  display: none
+}
+
+.step.active {
+  display: block
+}
+
+.time-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0
+}
+
+.time-btn {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #f6f6f6
+}
+
+.time-btn.active {
+  border-color: #111;
+  font-weight: 600
+}
+
+.seats-grid {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+  margin-top: 10px
+}
+
+.seat {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: #d5d5d5;
+  cursor: pointer;
+  user-select: none
+}
+
+.seat.selected {
+  background: #4caf50;
+  color: #fff
+}
+
+.seat.booked {
+  background: #e85c5c;
+  color: #fff;
+  cursor: not-allowed
+}
+
+.screen {
+  height: 16px;
+  background: linear-gradient(#ddd, #bbb);
+  border-radius: 6px;
+  margin: 10px 0
+}
+
+.btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #2f67ff;
+  color: #fff;
+  cursor: pointer
+}
+
+.btn[disabled] {
+  opacity: .6;
+  cursor: not-allowed
+}
+
+.ghost {
+  background: #eee;
+  color: #333;
+  border: 1px solid #ccc
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px
+}
+
+.meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px
+}
+
+.card {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+  background: #fff
+}
+
+h1 {
+  margin: 0 0 12px
+}
+
+label {
+  display: block;
+  margin: 8px 0 4px
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 10px
+}

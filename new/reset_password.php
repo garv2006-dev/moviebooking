@@ -2,7 +2,7 @@
 session_start();
 include "db.php";
 
-// જો યુઝર સીધો આ પેજ ખોલે, તો તેને પાછો મોકલો
+// If user directly opens this page, redirect back
 if (!isset($_SESSION['user_to_reset'])) {
     header("Location: forgot_password.php");
     exit();
@@ -13,25 +13,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirm_password = $_POST['confirm_password'];
 
     if ($new_password === $confirm_password) {
-        // નવો પાસવર્ડ હેશ (સુરક્ષિત) કરો
+        // Hash the new password (secure)
         $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
         $username = $_SESSION['user_to_reset'];
 
-        // ડેટાબેઝમાં પાસવર્ડ અપડેટ કરો
+        // Update password in database
         $stmt = $conn->prepare("UPDATE users SET password = ? WHERE username = ?");
         $stmt->bind_param("ss", $hashed_password, $username);
         
         if ($stmt->execute()) {
-            // સેશનમાંથી યુઝરનેમ કાઢી નાખો
+            // Remove username from session
             unset($_SESSION['user_to_reset']);
-            $success = "પાસવર્ડ સફળતાપૂર્વક બદલાઈ ગયો છે! હવે તમે લોગિન કરી શકો છો.";
+            $success = "Password successfully changed! You can now login.";
         } else {
-            $error = "કંઈક ભૂલ થઈ છે, કૃપા કરીને ફરી પ્રયાસ કરો.";
+            $error = "Something went wrong, please try again.";
         }
         $stmt->close();
 
     } else {
-        $error = "બંને પાસવર્ડ મેળ ખાતા નથી!";
+        $error = "Both passwords do not match!";
     }
 }
 ?>
