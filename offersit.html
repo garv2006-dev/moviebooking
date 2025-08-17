@@ -1,330 +1,249 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Movie Booking — Mini Project</title>
-  <link rel="stylesheet" href="offfersit.css">
+  <title>Offer Seat Booking</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .card { max-width: 500px; width: 100%; margin: 24px; padding: 24px; border-radius: 16px; box-shadow: 0 8px 30px rgba(0, 0, 0, .08); background: #fff; }
+    h1 { margin: 0 0 16px; font-size: 24px; text-align: center; }
+    h2 { font-size: 20px; margin: 0 0 12px; }
+    label { display: block; margin: 12px 0 6px; font-weight: 500; }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"] { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .btn-row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+    .btn { padding: 10px 16px; border: none; border-radius: 10px; background: #007bff; color: #fff; cursor: pointer; font-size: 16px; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+    .ghost { background: #eee; color: #333; border: 1px solid #ccc; }
+    .time-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+    .time-btn { padding: 8px 12px; border: 1px solid #ccc; border-radius: 8px; cursor: pointer; background: #f6f6f6; }
+    .time-btn.active { border-color: #007bff; font-weight: 600; background-color: #e7f1ff; }
+    .screen { height: 16px; background: linear-gradient(#555, #333); border-radius: 6px; margin: 20px 0; text-align: center; color: white; font-size: 12px; line-height: 16px; }
+    .seats-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px; margin-top: 10px; }
+    .seat { width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; border-radius: 6px; background: #d5d5d5; cursor: pointer; user-select: none; font-size: 14px; }
+    .seat.selected { background: #4caf50; color: #fff; }
+    .seat.booked { background: #e85c5c; color: #fff; cursor: not-allowed; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; font-size: 14px; }
+  </style>
 </head>
+
 <body>
-
   <div class="card">
-    <h1>Mini Movie Booking</h1>
+    <h1>Offer Seat Booking</h1>
 
-    <!-- STEP 1: USER DETAILS -->
     <section id="step-user" class="step active">
       <form id="user-details-form">
-        <h2>Enter Your Details</h2>
+        <h2>Step 1: Your Details</h2>
         <label for="name">Name</label>
         <input type="text" id="name" required placeholder="Your Name">
-
         <label for="phone">Phone</label>
         <input type="tel" id="phone" required placeholder="Your Phone Number" pattern="[0-9]{10}">
-
         <label for="email">Email</label>
         <input type="email" id="email" required placeholder="Your Email">
-
         <div class="btn-row">
-          <button id="to-date" class="btn" type="submit">Next: Date →</button>
+          <button class="btn" type="submit">Next: Date →</button>
         </div>
       </form>
     </section>
 
-    <!-- STEP 2: DATE -->
     <section id="step-date" class="step">
-      <label for="date">Select a date</label>
+      <h2>Step 2: Select Date</h2>
+      <label for="date">Choose a date</label>
       <input id="date" type="date" required />
       <div class="btn-row">
         <button id="back-to-user" class="ghost">← Back</button>
         <button id="to-time" class="btn" disabled>Next: Time →</button>
       </div>
     </section>
-
-    <!-- STEP 3: TIME -->
+    
     <section id="step-time" class="step">
-      <label>Select show time</label>
-      <div class="time-buttons" id="time-buttons">
-        <!-- buttons injected -->
-      </div>
-
+      <h2>Step 3: Select Time</h2>
+      <div id="time-buttons" class="time-buttons"></div>
       <div class="btn-row">
         <button id="back-to-date" class="ghost">← Back</button>
         <button id="to-seats" class="btn" disabled>Next: Seats →</button>
       </div>
     </section>
 
-    <!-- STEP 4: SEAT SELECTION -->
     <section id="step-seats" class="step">
-      <div class="seat-stage">
-        <div class="screen">Screen</div>
-        <div class="seats-grid" id="seats-grid"></div>
-
-        <div class="meta">
-          <div><strong>Selected:</strong> <span id="selected-count">0</span></div>
-          <div><strong>Seats:</strong> <span id="selected-list">—</span></div>
-          <div><strong>Show:</strong> <span id="meta-show">—</span></div>
-        </div>
-
-        <div class="notice">
-          Click seats to select. Booked seats for the current cinema+date+time show as <span
-            style="color:#fff;background:#e85c5c;padding:4px 8px;border-radius:6px">red</span>.
-        </div>
-
-        <div class="btn-row" style="justify-content:center;margin-top:16px;">
-          <button id="back-to-time" class="ghost">← Back</button>
-          <button id="confirm-book" class="btn" disabled>Book Selected Seats</button>
-        </div>
+      <h2>Step 4: Select Your Seats</h2>
+      <div class="screen">Screen</div>
+      <div id="seats-grid" class="seats-grid"></div>
+      <div class="meta">
+        <div><strong>Movie:</strong> <span id="meta-movie-name">—</span></div>
+        <div><strong>Show:</strong> <span id="meta-show">—</span></div>
+        <div><strong>Selected:</strong> <span id="selected-count">0</span> seats</div>
+        <div><strong>Total:</strong> ₹<span id="total-price">0</span></div>
+        <div style="grid-column: 1 / -1;"><strong>Seats:</strong> <span id="selected-list">—</span></div>
+      </div>
+      <div class="btn-row">
+        <button id="back-to-time" class="ghost">← Back</button>
+        <button id="confirm-book" class="btn" disabled>Confirm Booking</button>
       </div>
     </section>
-
   </div>
 
-  <script>
-    /* -------------------------
-       Data & configuration
-       ------------------------- */
-    const times = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
-    const SEAT_COUNT = 64; // grid (8 cols x 8 rows)
-    const SEATS_PER_ROW = 8;
+<script>
+// --- CONFIGURATION ---
+const SEATS_COUNT = 72;
+const SHOW_TIMES = ["10:00 AM", "01:00 PM", "04:00 PM", "07:00 PM", "10:00 PM"];
 
-    /* -------------------------
-       State
-       ------------------------- */
-    const state = {
-      user: {
-        name: null,
-        phone: null,
-        email: null
-      },
-      date: null,    // YYYY-MM-DD
-      time: null,
-      selectedSeats: []
-    };
+// --- INITIAL CHECK ---
+const movieName = localStorage.getItem("selectedMovieName");
+const moviePrice = Number(localStorage.getItem("selectedMoviePrice"));
 
-    /* -------------------------
-       Helpers: storage key per show
-       ------------------------- */
-    function showKey(date, time) {
-      // safe key (no spaces)
-      return `booking__${date}__${time.replace(/[:\s]+/g, '')}`;
+if (!movieName || !moviePrice) {
+  alert("No offer selected. Redirecting you to the offers page.");
+  window.location.href = "offer.php";
+}
+
+// --- STATE MANAGEMENT ---
+const state = {
+  user: { name: null, phone: null, email: null },
+  date: null,
+  time: null,
+  selectedSeats: [],
+  movie: { name: movieName, price: moviePrice }
+};
+
+// --- HELPER FUNCTIONS ---
+function goTo(stepId) {
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  document.getElementById(stepId).classList.add('active');
+}
+
+function generateStorageKey(movie, date, time) {
+  const formattedMovie = movie.replace(/\s+/g, '_');
+  const formattedTime = time.replace(/[:\s]/g, '');
+  return `booking__${formattedMovie}__${date}__${formattedTime}`;
+}
+
+function getBookedSeats(movie, date, time) {
+  const key = generateStorageKey(movie, date, time);
+  const rawData = localStorage.getItem(key);
+  return rawData ? JSON.parse(rawData) : [];
+}
+
+function saveBookedSeats(movie, date, time, seats) {
+  const key = generateStorageKey(movie, date, time);
+  localStorage.setItem(key, JSON.stringify(seats));
+}
+
+// --- RENDER & UPDATE FUNCTIONS ---
+function renderSeats() {
+  const grid = document.getElementById('seats-grid');
+  grid.innerHTML = '';
+  const bookedSeats = getBookedSeats(state.movie.name, state.date, state.time);
+  state.selectedSeats = []; // Clear previous selection when rendering
+
+  for (let i = 1; i <= SEATS_COUNT; i++) {
+    const seatNumber = String(i);
+    const seat = document.createElement('div');
+    seat.className = 'seat';
+    seat.textContent = seatNumber;
+
+    if (bookedSeats.includes(seatNumber)) {
+      seat.classList.add('booked');
     }
 
-    function getBookedSeats(date, time) {
-      const key = showKey(date, time);
-      const arr = JSON.parse(localStorage.getItem(key) || "[]");
-      return arr; // array of seat numbers as strings e.g. ["1","2"]
-    }
-
-    function saveBookedSeats(date, time, seatsArray) {
-      const key = showKey(date, time);
-      localStorage.setItem(key, JSON.stringify(seatsArray));
-    }
-
-    /* -------------------------
-       UI references
-       ------------------------- */
-    const userForm = document.getElementById('user-details-form');
-    const toDateBtn = document.getElementById('to-date');
-    const dateEl = document.getElementById('date');
-    const toTimeBtn = document.getElementById('to-time');
-    const timeButtonsDiv = document.getElementById('time-buttons');
-    const toSeatsBtn = document.getElementById('to-seats');
-    const seatsGrid = document.getElementById('seats-grid');
-    const selectedCount = document.getElementById('selected-count');
-    const selectedList = document.getElementById('selected-list');
-    const metaShow = document.getElementById('meta-show');
-    const confirmBookBtn = document.getElementById('confirm-book');
-
-    /* Step elements */
-    const stepUser = document.getElementById('step-user');
-    const stepDate = document.getElementById('step-date');
-    const stepTime = document.getElementById('step-time');
-    const stepSeats = document.getElementById('step-seats');
-
-    /* Back buttons */
-    document.getElementById('back-to-user').addEventListener('click', () => showStep('user'));
-    document.getElementById('back-to-date').addEventListener('click', () => showStep('date'));
-    document.getElementById('back-to-time').addEventListener('click', () => showStep('time'));
-
-    /* -------------------------
-       Init
-       ------------------------- */
-    (function init() {
-      // set min date to today
-      const today = new Date().toISOString().split('T')[0];
-      dateEl.setAttribute('min', today);
-
-      // User form submission
-      userForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        state.user = {
-          name: document.getElementById('name').value,
-          phone: document.getElementById('phone').value,
-          email: document.getElementById('email').value
-        };
-        showStep('date');
-      });
-
-      // Date change handler
-      dateEl.addEventListener('change', function () {
-        const val = dateEl.value;
-        if (!val) {
-          state.date = null;
-          toTimeBtn.disabled = true;
-          return;
-        }
-        state.date = val;
-        toTimeBtn.disabled = false;
-      });
-
-      // Time -> seats
-      toTimeBtn.addEventListener('click', () => {
-        if (!state.date) return;
-        showStep('time');
-        renderTimes();
-      });
-
-      // Seats -> confirmation
-      toSeatsBtn.addEventListener('click', () => {
-        if (!state.time) return;
-        showStep('seats');
-        renderSeats();
-      });
-
-      confirmBookBtn.addEventListener('click', onConfirmBooking);
-    })();
-
-    /* -------------------------
-       Functions
-       ------------------------- */
-
-    function renderTimes() {
-      timeButtonsDiv.innerHTML = '';
-      times.forEach(t => {
-        const b = document.createElement('button');
-        b.className = 'time-btn';
-        b.type = 'button';
-        b.textContent = t;
-        if (state.time === t) b.classList.add('active');
-        b.addEventListener('click', () => {
-          // toggle active class
-          [...timeButtonsDiv.children].forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          state.time = t;
-          toSeatsBtn.disabled = false;
-        });
-        timeButtonsDiv.appendChild(b);
-      });
-    }
-
-    function showStep(which) {
-      stepUser.classList.remove('active');
-      stepDate.classList.remove('active');
-      stepTime.classList.remove('active');
-      stepSeats.classList.remove('active');
-
-      if (which === 'user') stepUser.classList.add('active');
-      if (which === 'date') stepDate.classList.add('active');
-      if (which === 'time') stepTime.classList.add('active');
-      if (which === 'seats') stepSeats.classList.add('active');
-    }
-
-    /* Build seats grid and attach click handlers. State-aware: booked seats per show are red. */
-    function renderSeats() {
-      // need date/time
-      if (!state.date || !state.time) {
-        alert('Please select date and time first.');
-        return;
-      }
-
-      seatsGrid.innerHTML = '';
-      state.selectedSeats = [];
-      updateSelectedUI();
-
-      // meta show string
-      metaShow.textContent = `${state.date} @ ${state.time}`;
-
-      const booked = getBookedSeats(state.date, state.time).map(String);
-
-      for (let i = 1; i <= SEAT_COUNT; i++) {
-        const s = document.createElement('div');
-        s.className = 'seat';
-        s.textContent = i;
-        s.dataset.seat = String(i);
-
-        if (booked.includes(String(i))) {
-          s.classList.add('booked');
-        } else {
-          s.addEventListener('click', () => {
-            toggleSeatSelection(s);
-          });
-        }
-
-        seatsGrid.appendChild(s);
-      }
-    }
-
-    /* Toggle selection in current UI */
-    function toggleSeatSelection(el) {
-      const seatNo = el.dataset.seat;
-      if (el.classList.contains('selected')) {
-        el.classList.remove('selected');
-        state.selectedSeats = state.selectedSeats.filter(x => x !== seatNo);
+    seat.addEventListener('click', () => {
+      if (seat.classList.contains('booked')) return;
+      
+      const seatIndex = state.selectedSeats.indexOf(seatNumber);
+      if (seatIndex > -1) {
+        state.selectedSeats.splice(seatIndex, 1);
+        seat.classList.remove('selected');
       } else {
-        el.classList.add('selected');
-        state.selectedSeats.push(seatNo);
+        state.selectedSeats.push(seatNumber);
+        seat.classList.add('selected');
       }
-      updateSelectedUI();
-      confirmBookBtn.disabled = state.selectedSeats.length === 0;
+      updateMeta();
+    });
+    grid.appendChild(seat);
+  }
+}
+
+function updateMeta() {
+  document.getElementById('meta-movie-name').textContent = state.movie.name;
+  const showInfo = (state.date || '—') + ', ' + (state.time || '—');
+  document.getElementById('meta-show').textContent = showInfo;
+  document.getElementById('selected-count').textContent = state.selectedSeats.length;
+  document.getElementById('selected-list').textContent = state.selectedSeats.sort((a, b) => Number(a) - Number(b)).join(', ') || '—';
+  document.getElementById('total-price').textContent = (state.selectedSeats.length * state.movie.price).toFixed(2);
+  document.getElementById('confirm-book').disabled = state.selectedSeats.length === 0;
+}
+
+// --- BOOKING CONFIRMATION ---
+function onConfirmBooking() {
+  if (state.selectedSeats.length === 0) return;
+
+  const currentBookedSeats = getBookedSeats(state.movie.name, state.date, state.time);
+  const newBookingData = [...new Set([...currentBookedSeats, ...state.selectedSeats])].sort((a, b) => Number(a) - Number(b));
+  saveBookedSeats(state.movie.name, state.date, state.time, newBookingData);
+
+  localStorage.setItem('bookingUser', JSON.stringify(state.user));
+  localStorage.setItem('selectedDate', state.date);
+  localStorage.setItem('selectedTime', state.time);
+  localStorage.setItem('selectedSeats', JSON.stringify(state.selectedSeats));
+  
+  window.location.href = "offerbill.php";
+}
+
+// --- EVENT LISTENERS ---
+document.addEventListener('DOMContentLoaded', () => {
+  // Step 1: User Form
+  document.getElementById('user-details-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    state.user.name = document.getElementById('name').value.trim();
+    state.user.phone = document.getElementById('phone').value.trim();
+    state.user.email = document.getElementById('email').value.trim();
+    if (state.user.name && state.user.phone && state.user.email) {
+      goTo('step-date');
     }
+  });
 
-    function updateSelectedUI() {
-      selectedCount.textContent = state.selectedSeats.length;
-      selectedList.textContent = state.selectedSeats.length ? state.selectedSeats.sort((a, b) => a - b).join(', ') : '—';
-      confirmBookBtn.disabled = state.selectedSeats.length === 0;
-    }
+  // Step 2: Date Selection
+  const dateInput = document.getElementById('date');
+  dateInput.min = new Date().toISOString().slice(0, 10);
+  dateInput.addEventListener('change', () => {
+    state.date = dateInput.value;
+    state.time = null; // Reset time when date changes
+    state.selectedSeats = []; // Reset seats
+    document.querySelectorAll('.time-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('to-time').disabled = !state.date;
+    document.getElementById('to-seats').disabled = true;
+  });
 
-    /* Confirm booking: mark seats as booked for the current show and save to storage */
-    function onConfirmBooking() {
-      if (state.selectedSeats.length === 0) return alert('Select seats first.');
-
-      const booked = getBookedSeats(state.date, state.time).map(String);
-      for (const s of state.selectedSeats) {
-        if (booked.includes(s)) {
-          alert(`Seat ${s} was just booked by someone else. Please reselect.`);
-          return renderSeats();
-        }
-      }
-
-      const newBooked = [...booked, ...state.selectedSeats.map(String)];
-      newBooked.sort((a, b) => Number(a) - Number(b));
-      saveBookedSeats(state.date, state.time, newBooked);
-
-      const recs = JSON.parse(localStorage.getItem('booking_records') || '[]');
-      recs.push({
-        user: state.user,
-        date: state.date,
-        time: state.time,
-        seats: state.selectedSeats.slice(),
-        bookedAt: new Date().toISOString()
-      });
-      localStorage.setItem('booking_rescords', JSON.stringify(recs));
-
-      // ✅ Store data for bill.php
-      localStorage.getItem('selectedMovieName'); // Replace with real movie title if available
-      // localStorage.setItem('selectedMoviePrice', 150); // Replace with real ticket price if available
-      localStorage.setItem('bookingUser', JSON.stringify(state.user));
-      localStorage.setItem('selectedDate', state.date);
-      localStorage.setItem('selectedTime', state.time);
-      localStorage.setItem('selectedSeats', JSON.stringify(state.selectedSeats));
-
-      // Redirect
-      window.location.href = "offerbill.php";
-    }
-
-  </script>
+  // Step 3: Time Selection
+  const timeButtonsContainer = document.getElementById('time-buttons');
+  SHOW_TIMES.forEach(time => {
+    const btn = document.createElement('button');
+    btn.className = 'time-btn';
+    btn.textContent = time;
+    btn.onclick = () => {
+      state.time = time;
+      document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('to-seats').disabled = false;
+    };
+    timeButtonsContainer.appendChild(btn);
+  });
+  
+  // Navigation Buttons
+  document.getElementById('back-to-user').addEventListener('click', () => goTo('step-user'));
+  document.getElementById('to-time').addEventListener('click', () => goTo('step-time'));
+  document.getElementById('back-to-date').addEventListener('click', () => goTo('step-date'));
+  document.getElementById('to-seats').addEventListener('click', () => {
+    renderSeats();
+    updateMeta();
+    goTo('step-seats');
+  });
+  document.getElementById('back-to-time').addEventListener('click', () => goTo('step-time'));
+  document.getElementById('confirm-book').addEventListener('click', onConfirmBooking);
+});
+</script>
 
 </body>
-
 </html>

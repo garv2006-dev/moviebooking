@@ -205,21 +205,21 @@
       preview.src = "";
     });
   </script>
-<script>
-  function loadMovies() {
-    const movieDisplay = document.getElementById("movieDisplay");
+  <script>
+    function loadMovies() {
+      const movieDisplay = document.getElementById("movieDisplay");
 
-    // Fetch movies from PHP endpoint
-    fetch('addmovie.php?fetch=1')
-      .then(response => response.json())
-      .then(movies => {
-        movieDisplay.innerHTML = "";
+      // Fetch movies from PHP endpoint
+      fetch('addmovie.php?fetch=1')
+        .then(response => response.json())
+        .then(movies => {
+          movieDisplay.innerHTML = "";
 
-        movies.forEach((movie) => {
-          const card = document.createElement("div");
-          card.className = "card m-2";
-          card.style.width = "18rem";
-          card.innerHTML = `
+          movies.forEach((movie) => {
+            const card = document.createElement("div");
+            card.className = "card m-2";
+            card.style.width = "18rem";
+            card.innerHTML = `
             <img src="${movie.image}" class="card-img-top" alt="${movie.name}" />
             <div class="card-body">
               <h5 class="card-title">${movie.name}</h5>
@@ -228,24 +228,45 @@
             </div>
           `;
 
-          // ⭐ Save selected movie in localStorage
-         card.querySelector(".book-btn").addEventListener("click", () => {
-            localStorage.setItem("selectedMovieName", movie.name);
-            localStorage.setItem("selectedMoviePrice", movie.price);
-            window.location.href = "seat.html"; 
+            // ⭐ Save selected movie in localStorage
+            card.querySelector(".book-btn").addEventListener("click", () => {
+              localStorage.setItem("selectedMovieName", movie.name);
+              localStorage.setItem("selectedMoviePrice", movie.price);
+              window.location.href = "seat.html";
+            });
+
+
+            movieDisplay.appendChild(card);
           });
+        })
+        .catch(error => console.error('Error loading movies:', error));
+    }
 
+    window.addEventListener("DOMContentLoaded", loadMovies);
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const authButtons = document.querySelector(".auth-buttons");
 
-          movieDisplay.appendChild(card);
-        });
-      })
-      .catch(error => console.error('Error loading movies:', error));
-  }
-
-  window.addEventListener("DOMContentLoaded", loadMovies);
-</script>
-
+      // પાથને સુધારીને 'new/session_check.php' કરવામાં આવ્યો છે
+      fetch('new/session_check.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.loggedIn) {
+            // જો યુઝર લોગિન થયેલ હોય, તો તેનું નામ બતાવો જે logout_page.php પર લિંક કરે છે
+            authButtons.innerHTML = `
+              <div class="user-info">
+                <a href="new/logout_page.php" style="text-decoration: none; color: white; font-size: 1.1em; padding: 8px 15px; background-color: #007bff; border-radius: 5px;">
+                  ${data.username}
+                </a>
+              </div>
+            `;
+          }
+          // જો યુઝર લોગિન થયેલ ન હોય, તો મૂળ "Login" બટન જેમ છે તેમ રહેશે.
+        })
+        .catch(error => console.error('Error checking session:', error));
+    });
+  </script>
 </body>
 
 </html>
-

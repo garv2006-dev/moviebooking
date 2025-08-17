@@ -6,20 +6,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $password = $_POST["password"];
 
-    // Check if user exists
-    $checkUser = "SELECT * FROM users WHERE username='$username'";
-    $result = $conn->query($checkUser);
+    // પાસવર્ડને હેશ કરો (સુરક્ષા માટે)
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+    // યુઝર અસ્તિત્વમાં છે કે નહીં તે તપાસો
+    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        echo "<script>alert('Username already exists!'); window.location.href='register.php';</script>";
+        echo "<script>alert('આ યુઝરનેમ પહેલેથી જ અસ્તિત્વમાં છે!'); window.location.href='register.php';</script>";
     } else {
-        $sql = "INSERT INTO users (username, email, password) VALUES ('$username', '$email', '$password')";
-        if ($conn->query($sql)) {
-            echo "<script>alert('Registered successfully! Please login.'); window.location.href='index.php';</script>";
+        // નવો યુઝર ઉમેરો
+        $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+        $stmt->bind_param("sss", $username, $email, $hashed_password);
+        
+        if ($stmt->execute()) {
+            echo "<script>alert('તમારું રજીસ્ટ્રેશન સફળ થયું! હવે લોગિન કરો.'); window.location.href='index.php';</script>";
         } else {
-            echo "Error: " . $conn->error;
+            echo "Error: " . $stmt->error;
         }
     }
+    $stmt->close();
+    $conn->close();
 }
 ?>
 

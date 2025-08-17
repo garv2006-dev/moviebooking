@@ -2,34 +2,51 @@
 session_start();
 include "db.php";
 
-$username = $_POST['username'];
-$password = $_POST['password'];
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
 
-// Use prepared statements for security (prevents SQL Injection)
-$stmt = $conn->prepare("SELECT * FROM users WHERE username = ? AND password = ?");
-$stmt->bind_param("ss", $username, $password);
-$stmt->execute();
-$result = $stmt->get_result();
+    // SQL Injection થી બચવા માટે
+    $stmt = $conn->prepare("SELECT password FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($result->num_rows > 0) {
-    $_SESSION['username'] = $username;
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $hashed_password = $row['password'];
 
-    // Check if admin
-    if ($username === "garv") {
-        echo "<script>
-            alert('Admin Login Successful');
-            window.location.href='http://localhost/garv/admin.php';  // change to PHP for server access
-        </script>";
+        // પાસવર્ડને હેશ સાથે સરખાવો
+        if (password_verify($password, $hashed_password)) {
+            $_SESSION['username'] = $username;
+
+            // જો યુઝર "garv" હોય તો એડમિન પેનલ પર મોકલો
+            if ($username === "garv") {
+                echo "<script>
+                    alert('Admin Login Successful');
+                    window.location.href='http://localhost/garv/admin.php';
+                </script>";
+            } else {
+                // અન્ય યુઝર માટે index.html પર મોકલો
+                echo "<script>
+                    alert('Login Successful');
+                    window.location.href='http://localhost/garv/index.html';
+                </script>";
+            }
+        } else {
+            // ખોટો પાસવર્ડ
+            echo "<script>
+                alert('Invalid Credentials');
+                window.location.href='index.php';
+            </script>";
+        }
     } else {
+        // ખોટું યુઝરનેમ
         echo "<script>
-            alert('Login Successful');
-            window.location.href='welcome.php';
+            alert('Invalid Credentials');
+            window.location.href='index.php';
         </script>";
     }
-} else {
-    echo "<script>
-        alert('Invalid Credentials');
-        window.location.href='index.php';
-    </script>";
+    $stmt->close();
 }
 ?>

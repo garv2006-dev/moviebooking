@@ -13,7 +13,7 @@
         <input type="password" name="password" placeholder="Password" required><br>
         <button type="submit">Login</button>
     </form>
-    <a href="forgot.php">Forgot Password?</a>
+    <a href="forgot_password.php">Forgot Password?</a>
     <a href="register.php">Create New Account</a>
 </div>
 </body>
