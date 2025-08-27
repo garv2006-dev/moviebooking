@@ -142,23 +142,39 @@
     document.getElementById('total').textContent = `Total: ₹${total.toFixed(2)}`;
 
     // --- QR Code Scanner Logic ---
-    function onScanSuccess(decodedText) {
-      const paymentBox = document.getElementById("payment-box");
-      const loadingDiv = document.getElementById("loading");
-      const confirmationDiv = document.getElementById("confirmation");
-      const downloadBtn = document.getElementById("downloadBill");
-      
-      paymentBox.style.display = 'none'; // Hide scanner
-      loadingDiv.style.display = 'block'; // Show loading message
-      
-      html5QrcodeScanner.clear().then(() => {
-        setTimeout(() => {
-          loadingDiv.style.display = 'none'; // Hide loading
-          confirmationDiv.style.display = 'block'; // Show confirmation
-          downloadBtn.style.display = 'inline-block'; // Show download button
-        }, 2000);
-      }).catch(error => console.error('Failed to stop QR scanner.', error));
-    }
+  function onScanSuccess() {
+  document.getElementById("payment-box").style.display = "none";
+  document.getElementById("confirmation").style.display = "block";
+  document.getElementById("downloadBill").style.display = "inline-block";
+
+  // ✅ Save Offer Booking into localStorage.bookings
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  bookings.push({
+    movie: movieName,
+    cinema: "Offer Show",
+    date: date,
+    time: time,
+    seats: seats,
+    amount: total,
+    cancelled: false
+  });
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+
+  // ✅ Save booked seats per show
+  let bookedSeats = JSON.parse(localStorage.getItem("bookedSeats")) || {};
+  let key = `${movieName}_OfferShow_${date}_${time}`;
+  if (!bookedSeats[key]) {
+    bookedSeats[key] = [];
+  }
+  bookedSeats[key] = bookedSeats[key].concat(seats);
+  localStorage.setItem("bookedSeats", JSON.stringify(bookedSeats));
+
+  // ✅ Wallet deduction (optional)
+  let wallet = parseFloat(localStorage.getItem("wallet") || "0");
+  wallet -= total;
+  localStorage.setItem("wallet", wallet);
+}
+
 
     const html5QrcodeScanner = new Html5QrcodeScanner(
       "qr-reader", { fps: 10, qrbox: 250 }, false
@@ -166,47 +182,53 @@
     html5QrcodeScanner.render(onScanSuccess);
 
     // --- PDF Download Logic ---
-    document.getElementById("downloadBill").addEventListener("click", () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
+   document.getElementById("downloadBill").addEventListener("click", () => {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-      // Title
-      doc.setFontSize(20);
-      // **** THIS LINE IS CHANGED ****
-      doc.text("CineBook - Offer Booking Invoice", 14, 22);
-      doc.setFontSize(12);
-      doc.text(`Booking Date: ${new Date().toLocaleDateString()}`, 14, 30);
+  // Title
+  doc.setFontSize(20);
+  doc.text("CineBook - Offer Booking Invoice", 14, 22);
+  doc.setFontSize(12);
+  doc.text(`Booking Date: ${new Date().toLocaleDateString()}`, 14, 30);
 
-      // Table Data
-      const tableData = [
-        ["Movie", movieName],
-        ["Name", userData.name || "—"],
-        ["Phone", userData.phone || "—"],
-        ["Email", userData.email || "—"],
-        ["Show Date", date],
-        ["Show Time", time],
-        ["Seats", seats.join(', ') || "—"],
-        ["Price per Ticket", `₹${pricePerSeat.toFixed(2)}`],
-        ["Total Amount", `₹${total.toFixed(2)}`],
-        ["Status", "✅ Payment Successful"]
-      ];
+  // Table Data
+  const tableData = [
+    ["Movie", movieName],
+    ["Name", userData.name || "—"],
+    ["Phone", userData.phone || "—"],
+    ["Email", userData.email || "—"],
+    ["Show Date", date],
+    ["Show Time", time],
+    ["Seats", seats.join(', ') || "—"],
+    ["Price per Ticket", `₹${pricePerSeat.toFixed(2)}`],
+    ["Total Amount", `₹${total.toFixed(2)}`],
+    ["Status", "✅ Payment Successful"]
+  ];
 
-      doc.autoTable({
-        startY: 40,
-        head: [['Detail', 'Information']],
-        body: tableData,
-        theme: "grid",
-        headStyles: { fillColor: [22, 160, 133], halign: 'center' },
-        columnStyles: { 0: { fontStyle: 'bold' } }
-      });
+  doc.autoTable({
+    startY: 40,
+    head: [['Detail', 'Information']],
+    body: tableData,
+    theme: "grid",
+    headStyles: { fillColor: [22, 160, 133], halign: 'center' },
+    columnStyles: { 0: { fontStyle: 'bold' } }
+  });
 
-      // Footer
-      const finalY = doc.lastAutoTable.finalY || 100;
-      doc.setFontSize(10);
-      doc.text("Thank you for booking with CineBook!", 14, finalY + 15);
-      
-      doc.save("CineBook_Offer_Ticket.pdf");
-    });
+  // Footer
+  const finalY = doc.lastAutoTable.finalY || 100;
+  doc.setFontSize(10);
+  doc.text("Thank you for booking with CineBook!", 14, finalY + 15);
+
+  // ✅ Save PDF
+  doc.save("CineBook_Offer_Ticket.pdf");
+
+  // ✅ Redirect after download
+  setTimeout(() => {
+    window.location.href = "booking.html";
+  }, 1500); // 1.5 sec pachhi redirect
+});
+
 </script>
 
 </body>

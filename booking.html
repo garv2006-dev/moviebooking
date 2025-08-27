@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🎟 My Bookings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .wallet-box {
+      text-align: right;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+    .booking-card {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .booking-card p {
+      margin: 5px 0;
+    }
+    button.cancel-btn {
+      background: red;
+      color: #fff;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .status-cancelled {
+      color: red;
+      font-weight: bold;
+    }
+    .status-confirmed {
+      color: green;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎟 My Bookings</h1>
+  <div class="wallet-box">Wallet Balance: <span id="wallet">₹0</span></div>
+  <div id="bookings"></div>
+
+  <script>
+    // ✅ Update Wallet UI
+    function updateWallet() {
+      let wallet = parseFloat(localStorage.getItem("wallet") || "0");
+      document.getElementById("wallet").innerText = "₹" + wallet.toFixed(2);
+    }
+
+    // ✅ Render Bookings
+    // ✅ Render Bookings
+function loadBookings() {
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  let container = document.getElementById("bookings");
+  container.innerHTML = "";
+
+  if (bookings.length === 0) {
+    container.innerHTML = "<p>No bookings yet.</p>";
+    return;
+  }
+
+  bookings.forEach((b, index) => {
+    // ❌ Skip cancelled bookings
+    if (b.cancelled) return;
+
+    let div = document.createElement("div");
+    div.className = "booking-card";
+    div.innerHTML = `
+      <p><b>Movie:</b> ${b.movie}</p>
+      <p><b>Cinema:</b> ${b.cinema}</p>
+      <p><b>Date:</b> ${b.date} ${b.time}</p>
+      <p><b>Seats:</b> ${b.seats.join(", ")}</p>
+      <p><b>Amount:</b> ₹${b.amount}</p>
+      <p><b>Status:</b> <span class='status-confirmed'>Confirmed</span></p>
+      <button class="cancel-btn" onclick="cancelBooking(${index})">Cancel Booking</button>
+    `;
+    container.appendChild(div);
+  });
+
+  // Agar badha cancel thay gaya to "No bookings yet" dikhadvo
+  if (!container.hasChildNodes()) {
+    container.innerHTML = "<p>No bookings yet.</p>";
+  }
+}
+
+    // ✅ Cancel Booking + Refund + Free Seats
+   // ✅ Cancel Booking + Refund + Free Seats
+function cancelBooking(index) {
+  let bookings = JSON.parse(localStorage.getItem("bookings")) || [];
+  let booking = bookings[index];
+
+  if (!confirm(`Do you really want to cancel seats: ${booking.seats.join(", ")} ?`)) return;
+
+  // Refund wallet
+  let wallet = parseFloat(localStorage.getItem("wallet") || "0");
+  wallet += booking.amount;
+  localStorage.setItem("wallet", wallet);
+
+  // Mark booking as cancelled
+  bookings[index].cancelled = true;
+  localStorage.setItem("bookings", JSON.stringify(bookings));
+
+  // Free seats
+  let bookedSeats = JSON.parse(localStorage.getItem("bookedSeats")) || {};
+  let key = `${booking.movie}_${booking.cinema}_${booking.date}_${booking.time}`;
+  if (bookedSeats[key]) {
+    booking.seats.forEach(seat => {
+      bookedSeats[key] = bookedSeats[key].filter(s => s !== seat);
+    });
+    localStorage.setItem("bookedSeats", JSON.stringify(bookedSeats));
+  }
+
+  alert("Booking cancelled successfully ✅");
+  loadBookings();
+  updateWallet();
+}
+
+    // On page load
+    loadBookings();
+    updateWallet();
+  </script>
+</body>
+</html>

@@ -108,7 +108,7 @@ $offers = $conn->query("SELECT * FROM offers");
     <thead>
         <tr>
             <th>Title</th>
-            <th>Discount (%)</th>
+            <th>Discription</th>
         </tr>
     </thead>
     <tbody>
