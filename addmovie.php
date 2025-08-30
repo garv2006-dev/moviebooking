@@ -148,6 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
                 <th>Price (₹)</th>
                 <th>Edit</th>
                 <th>Delete</th>
+                <th>Viwe</th>
             </tr>
         </thead>
         <tbody id="movieList"></tbody>
@@ -211,6 +212,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
                             <td>₹${movie.price}</td>
                             <td><i class="fa-regular fa-pen-to-square" style="cursor:pointer;" onclick="editMovie(${movie.id})"></i></td>
                             <td><i class="fa-solid fa-trash" style="cursor:pointer;" onclick="deleteMovie(${movie.id})"></i></td>
+                            <td><i class="fa-solid fa-eye" style="cursor:pointer;" onclick="window.open('index.html', '_self')"></i></td>
                         `;
                         list.appendChild(tr);
                     });

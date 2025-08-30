@@ -140,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
       <th>Description</th>
       <th>Edit</th>
       <th>Delete</th>
+      <th>Viwe</th>
     </tr>
   </thead>
   <tbody id="offerList"></tbody>
@@ -203,6 +204,7 @@ function fetchOffers() {
           <td>${offer.description}</td>
           <td><i class="fa-regular fa-pen-to-square" style="cursor:pointer;color:blue" onclick="editOffer(${offer.id}, '${offer.name}', '${offer.price}', '${offer.description}', '${offer.image}')"></i></td>
           <td><i class="fa-solid fa-trash" style="cursor:pointer;color:red" onclick="deleteOffer(${offer.id})"></i></td>
+          <td><i class="fa-solid fa-eye" style="cursor:pointer;" onclick="window.open('offer.php', '_self')"></i></td>
         `;
         list.appendChild(tr);
       });
