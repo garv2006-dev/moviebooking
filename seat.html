@@ -1,291 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Movie Booking — Mini Project</title>
+    <link rel="stylesheet" href="./style/seat.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Movie Booking — Mini Project</title>
-  <link rel="stylesheet" href="./style/seat.css">
-</head>
+  </head>
 
-<body>
-  <div class="card">
-    <h1>Movie Seat Booking</h1>
+  <body>
+    <div class="card">
+      <h1>Movie Seat Booking</h1>
 
-    <!-- STEP 1: USER DETAILS -->
-    <section id="step-user" class="step active">
-      <form id="user-details-form">
-        <h2>Enter Your Details</h2>
-        <label for="name">Name</label>
-        <input type="text" id="name" required placeholder="Your Name">
+      <!-- STEP 1: USER DETAILS -->
+      <section id="step-user" class="step active">
+        <form id="user-details-form">
+          <h2>Enter Your Details</h2>
+          <label for="name">Name</label>
+          <input type="text" id="name" required placeholder="Your Name" />
 
-        <label for="phone">Phone</label>
-        <input type="tel" id="phone" required placeholder="Your Phone Number" pattern="[0-9]{10}">
+          <label for="phone">Phone</label>
+          <input
+            type="tel"
+            id="phone"
+            required
+            placeholder="Your Phone Number"
+            pattern="[0-9]{10}"
+          />
 
-        <label for="email">Email</label>
-        <input type="email" id="email" required placeholder="Your Email">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="Your Email" />
 
+          <div class="btn-row">
+            <button id="to-date" class="btn" type="submit">Next: Date →</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- STEP 2: DATE -->
+      <section id="step-date" class="step">
+        <h2>Select Date</h2>
+        <label for="date">Choose a date</label>
+        <input id="date" type="text" required />
         <div class="btn-row">
-          <button id="to-date" class="btn" type="submit">Next: Date →</button>
+          <button id="back-to-user" class="ghost">← Back</button>
+          <button id="to-time" class="btn" disabled>Next: Time →</button>
         </div>
-      </form>
-    </section>
+      </section>
 
-    <!-- STEP 2: DATE -->
-    <section id="step-date" class="step">
-      <h2>Select Date</h2>
-      <label for="date">Choose a date</label>
-      <input id="date" type="date" required />
-      <div class="btn-row">
-        <button id="back-to-user" class="ghost">← Back</button>
-        <button id="to-time" class="btn" disabled>Next: Time →</button>
-      </div>
-    </section>
 
-    <!-- STEP 3: TIME -->
-    <section id="step-time" class="step">
-      <h2>Select Time</h2>
-      <div id="time-buttons" class="time-buttons"><!-- injected --></div>
-      <div class="btn-row">
-        <button id="back-to-date" class="ghost">← Back</button>
-        <button id="to-seats" class="btn" disabled>Next: Seats →</button>
-      </div>
-    </section>
-
-    <!-- STEP 4: SEATS -->
-    <section id="step-seats" class="step">
-      <h2>Select Seats</h2>
-      <div class="screen"></div>
-      <div id="seats-grid" class="seats-grid"></div>
-
-      <div class="meta">
-        <div><strong>Movie:</strong> <span id="movie-name">—</span></div>
-        <div><strong>Price:</strong> ₹<span id="movie-price">0</span></div>
-        <div><strong>Selected:</strong> <span id="selected-count">0</span></div>
-        <div><strong>Seats:</strong> <span id="selected-list">—</span></div>
-        <div><strong>Show:</strong> <span id="meta-show">—</span></div>
-        <div><strong>Total:</strong> ₹<span id="total-price">0</span></div>
-      </div>
-
-      <div class="btn-row" style="justify-content:space-between;margin-top:16px;">
-        <div>
-          <button id="back-to-time" class="ghost">← Back</button>
+      <!-- STEP 3: TIME -->
+      <section id="step-time" class="step">
+        <h2>Select Time</h2>
+        <div id="time-buttons" class="time-buttons"><!-- injected --></div>
+        <div class="btn-row">
+          <button id="back-to-date" class="ghost">← Back</button>
+          <button id="to-seats" class="btn" disabled>Next: Seats →</button>
         </div>
-        <button id="confirm-book" class="btn" disabled>Book Selected Seats</button>
-      </div>
-    </section>
-  </div>
+      </section>
 
-  <script>
-    /* ---------- Config ---------- */
-    const times = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
-    const SEAT_COUNT = 64;
-    const SEATS_PER_ROW = 8;
+      <!-- STEP 4: SEATS -->
+      <section id="step-seats" class="step">
+        <h2>Select Seats</h2>
+        <div class="screen"></div>
+        <div id="seats-grid" class="seats-grid"></div>
 
-    /* ---------- Read movie from localStorage ---------- */
-    const movieName = localStorage.getItem('selectedMovieName');
-    const moviePrice = Number(localStorage.getItem('selectedMoviePrice'));
+        <div class="meta">
+          <div><strong>Movie:</strong> <span id="movie-name">—</span></div>
+          <div><strong>Price:</strong> ₹<span id="movie-price">0</span></div>
+          <div>
+            <strong>Selected:</strong> <span id="selected-count">0</span>
+          </div>
+          <div><strong>Seats:</strong> <span id="selected-list">—</span></div>
+          <div><strong>Show:</strong> <span id="meta-show">—</span></div>
+          <div><strong>Total:</strong> ₹<span id="total-price">0</span></div>
+        </div>
 
-    if (!movieName || !moviePrice) {
-      alert("Please select a movie first.");
-      window.location.href = "index.html";
-    }
+        <div
+          class="btn-row"
+          style="justify-content: space-between; margin-top: 16px"
+        >
+          <div>
+            <button id="back-to-time" class="ghost">← Back</button>
+          </div>
+          <button id="confirm-book" class="btn" disabled>
+            Book Selected Seats
+          </button>
+        </div>
+      </section>
+    </div>
 
-    /* ---------- State ---------- */
-    const state = {
-      user: { name: null, phone: null, email: null },
-      date: null,
-      time: null,
-      selectedSeats: [],
-      movie: { name: movieName, price: moviePrice }
-    };
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    /* ---------- Helpers (storage keys for show) ---------- */
-    function showKey(date, time, movieName) {
-      return `booking__${movieName.replace(/\s+/g, '_')}__${date}__${time.replace(/[:\s]+/g, '')}`;
-    }
-    function getBookedSeats(date, time, movieName) {
-      const key = showKey(date, time, movieName);
-      const raw = localStorage.getItem(key);
-      if (!raw) return [];
-      try { const arr = JSON.parse(raw); return Array.isArray(arr) ? arr : []; } catch { return []; }
-    }
-    function saveBookedSeats(date, time, movieName, seatsArray) {
-      const key = showKey(date, time, movieName);
-      localStorage.setItem(key, JSON.stringify(seatsArray));
-    }
+    <script>
+      /* ---------- Config ---------- */
+      const times = ["10:00 AM", "1:00 PM", "4:00 PM", "7:00 PM", "10:00 PM"];
+      const SEAT_COUNT = 64;
+      const SEATS_PER_ROW = 8;
 
-    /* ---------- Step navigation ---------- */
-    function goTo(id) {
-      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-    }
+      /* ---------- Read movie from localStorage ---------- */
+      const movieName = localStorage.getItem("selectedMovieName");
+      const moviePrice = Number(localStorage.getItem("selectedMoviePrice"));
 
-    /* ---------- UI binds ---------- */
-    document.addEventListener('DOMContentLoaded', () => {
-      // Step 1: user form
-      const userForm = document.getElementById('user-details-form');
-      userForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const name = document.getElementById('name').value.trim();
-        const phone = document.getElementById('phone').value.trim();
-        const email = document.getElementById('email').value.trim();
-        if (!name || !phone || !email) return;
-        state.user = { name, phone, email };
-        goTo('step-date');
-      });
+      if (!movieName || !moviePrice) {
+        alert("Please select a movie first.");
+        window.location.href = "index.html";
+      }
 
-      // Step 2: date
-      const dateInput = document.getElementById('date');
-      const toTimeBtn = document.getElementById('to-time');
-      // min today
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      dateInput.min = today.toISOString().slice(0, 10);
-      dateInput.addEventListener('change', () => {
-        state.date = dateInput.value || null;
-        // when date changes, clear selections depending on later steps
-        state.selectedSeats = [];
-        updateMeta();
-        toTimeBtn.disabled = !state.date;
-      });
-      document.getElementById('back-to-user').addEventListener('click', () => goTo('step-user'));
+      /* ---------- State ---------- */
+      const state = {
+        user: { name: null, phone: null, email: null },
+        date: null,
+        time: null,
+        selectedSeats: [],
+        movie: { name: movieName, price: moviePrice },
+      };
 
-      toTimeBtn.addEventListener('click', () => {
-        if (!state.date) return;
-        goTo('step-time');
-      });
+      /* ---------- Helpers (storage keys for show) ---------- */
+      function showKey(date, time, movieName) {
+        return `booking__${movieName.replace(
+          /\s+/g,
+          "_"
+        )}__${date}__${time.replace(/[:\s]+/g, "")}`;
+      }
+      function getBookedSeats(date, time, movieName) {
+        const key = showKey(date, time, movieName);
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        try {
+          const arr = JSON.parse(raw);
+          return Array.isArray(arr) ? arr : [];
+        } catch {
+          return [];
+        }
+      }
+      function saveBookedSeats(date, time, movieName, seatsArray) {
+        const key = showKey(date, time, movieName);
+        localStorage.setItem(key, JSON.stringify(seatsArray));
+      }
 
-      // Step 3: time
-      const timeWrap = document.getElementById('time-buttons');
-      const toSeatsBtn = document.getElementById('to-seats');
-      times.forEach(t => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'time-btn';
-        b.textContent = t;
-        b.addEventListener('click', () => {
-          state.time = t;
-          // active style
-          document.querySelectorAll('.time-btn').forEach(x => x.classList.remove('active'));
-          b.classList.add('active');
-          // clear seat selection when time changes
+      /* ---------- Step navigation ---------- */
+      function goTo(id) {
+        document
+          .querySelectorAll(".step")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      /* ---------- UI binds ---------- */
+      document.addEventListener("DOMContentLoaded", () => {
+        // Step 1: user form
+        const userForm = document.getElementById("user-details-form");
+        userForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("name").value.trim();
+          const phone = document.getElementById("phone").value.trim();
+          const email = document.getElementById("email").value.trim();
+          if (!name || !phone || !email) return;
+          state.user = { name, phone, email };
+          goTo("step-date");
+        });
+
+        // Step 2: date
+        const dateInput = document.getElementById("date");
+        const toTimeBtn = document.getElementById("to-time");
+        // min today
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        dateInput.min = today.toISOString().slice(0, 10);
+        dateInput.addEventListener("change", () => {
+          state.date = dateInput.value || null;
+          // when date changes, clear selections depending on later steps
           state.selectedSeats = [];
           updateMeta();
-          toSeatsBtn.disabled = false;
+          toTimeBtn.disabled = !state.date;
         });
-        timeWrap.appendChild(b);
+        document
+          .getElementById("back-to-user")
+          .addEventListener("click", () => goTo("step-user"));
+
+        toTimeBtn.addEventListener("click", () => {
+          if (!state.date) return;
+          goTo("step-time");
+        });
+
+        // Step 3: time
+        const timeWrap = document.getElementById("time-buttons");
+        const toSeatsBtn = document.getElementById("to-seats");
+        times.forEach((t) => {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "time-btn";
+          b.textContent = t;
+          b.addEventListener("click", () => {
+            state.time = t;
+            // active style
+            document
+              .querySelectorAll(".time-btn")
+              .forEach((x) => x.classList.remove("active"));
+            b.classList.add("active");
+            // clear seat selection when time changes
+            state.selectedSeats = [];
+            updateMeta();
+            toSeatsBtn.disabled = false;
+          });
+          timeWrap.appendChild(b);
+        });
+
+        document
+          .getElementById("back-to-date")
+          .addEventListener("click", () => goTo("step-date"));
+        toSeatsBtn.addEventListener("click", () => {
+          if (!state.time) return;
+          renderSeats();
+          updateMeta();
+          goTo("step-seats");
+        });
+
+        // Step 4: seats
+        document
+          .getElementById("back-to-time")
+          .addEventListener("click", () => goTo("step-time"));
+        document
+          .getElementById("confirm-book")
+          .addEventListener("click", onConfirmBooking);
+
+        // Static meta info
+        document.getElementById("movie-name").textContent = state.movie.name;
+        document.getElementById("movie-price").textContent = state.movie.price;
+        updateMeta(); // initial
       });
 
-      document.getElementById('back-to-date').addEventListener('click', () => goTo('step-date'));
-      toSeatsBtn.addEventListener('click', () => {
-        if (!state.time) return;
-        renderSeats();
-        updateMeta();
-        goTo('step-seats');
-      });
+      /* ---------- Render seats ---------- */
+      function renderSeats() {
+        const grid = document.getElementById("seats-grid");
+        grid.innerHTML = "";
+        if (!state.date || !state.time) return;
 
-      // Step 4: seats
-      document.getElementById('back-to-time').addEventListener('click', () => goTo('step-time'));
-      document.getElementById('confirm-book').addEventListener('click', onConfirmBooking);
+        const booked = getBookedSeats(
+          state.date,
+          state.time,
+          state.movie.name
+        ).map(String);
 
-      // Static meta info
-      document.getElementById('movie-name').textContent = state.movie.name;
-      document.getElementById('movie-price').textContent = state.movie.price;
-      updateMeta(); // initial
-    });
+        for (let i = 1; i <= SEAT_COUNT; i++) {
+          const seat = document.createElement("div");
+          seat.className = "seat";
+          seat.textContent = i;
+          seat.dataset.seat = String(i); // ✅ ensure seat ID as string
 
-    /* ---------- Render seats ---------- */
-    function renderSeats() {
-    const grid = document.getElementById('seats-grid');
-    grid.innerHTML = '';
-    if (!state.date || !state.time) return;
+          // 👇👉 Aa jagyae add karvanu
+          if (booked.includes(String(i))) {
+            seat.classList.add("booked"); // red (already booked)
+          } else if (state.selectedSeats.includes(i)) {
+            seat.classList.add("selected"); // green (selected by user)
+          }
 
-    const booked = getBookedSeats(state.date, state.time, state.movie.name).map(String);
+          seat.addEventListener("click", () => {
+            if (seat.classList.contains("booked")) return;
+            if (state.selectedSeats.includes(i)) {
+              state.selectedSeats = state.selectedSeats.filter((s) => s !== i);
+            } else {
+              state.selectedSeats.push(i);
+            }
+            updateMeta();
+            renderSeats();
+          });
 
-    for (let i = 1; i <= SEAT_COUNT; i++) {
-      const seat = document.createElement('div');
-      seat.className = 'seat';
-      seat.textContent = i;
-      seat.dataset.seat = String(i); // ✅ ensure seat ID as string
-
-      if (booked.includes(String(i))) {
-        seat.classList.add('booked'); // red (already booked)
-      } else if (state.selectedSeats.includes(i)) {
-        seat.classList.add('selected'); // green (selected by user)
+          grid.appendChild(seat);
+        }
       }
 
-      seat.addEventListener('click', () => {
-        if (seat.classList.contains('booked')) return;
-        if (state.selectedSeats.includes(i)) {
-          state.selectedSeats = state.selectedSeats.filter(s => s !== i);
-        } else {
-          state.selectedSeats.push(i);
-        }
-        updateMeta();
-        renderSeats();
-      });
+      /* ---------- Update meta ---------- */
+      function updateMeta() {
+        document.getElementById("selected-count").textContent =
+          state.selectedSeats.length;
+        document.getElementById("selected-list").textContent =
+          state.selectedSeats.join(", ") || "—";
+        const show =
+          (state.date ? state.date : "—") +
+          (state.time ? `, ${state.time}` : "");
+        document.getElementById("meta-show").textContent = show || "—";
+        document.getElementById("total-price").textContent = (
+          state.selectedSeats.length * state.movie.price
+        ).toFixed(2);
 
-      grid.appendChild(seat);
-    }
-  }
-
-    /* ---------- Update meta ---------- */
-    function updateMeta() {
-      document.getElementById('selected-count').textContent = state.selectedSeats.length;
-      document.getElementById('selected-list').textContent = state.selectedSeats.join(', ') || '—';
-      const show = (state.date ? state.date : '—') + (state.time ? `, ${state.time}` : '');
-      document.getElementById('meta-show').textContent = show || '—';
-      document.getElementById('total-price').textContent = (state.selectedSeats.length * state.movie.price).toFixed(2);
-
-      // Enable confirm when we have date, time, and at least 1 seat
-      const ok = !!state.date && !!state.time && state.selectedSeats.length > 0;
-      document.getElementById('confirm-book').disabled = !ok;
-    }
-
-    /* ---------- Confirm booking ---------- */
-    function onConfirmBooking() {
-      if (!state.date || !state.time || state.selectedSeats.length === 0) return;
-
-      // double-check race with already-booked seats
-      const booked = getBookedSeats(state.date, state.time, state.movie.name).map(String);
-      for (const s of state.selectedSeats) {
-        if (booked.includes(String(s))) {
-          alert(`Seat ${s} was just booked. Please reselect.`);
-          return renderSeats();
-        }
+        // Enable confirm when we have date, time, and at least 1 seat
+        const ok =
+          !!state.date && !!state.time && state.selectedSeats.length > 0;
+        document.getElementById("confirm-book").disabled = !ok;
       }
 
-      // persist seats for that show
-      const newBooked = [...booked, ...state.selectedSeats.map(String)]
-        .sort((a, b) => Number(a) - Number(b));
-      saveBookedSeats(state.date, state.time, state.movie.name, newBooked);
+      /* ---------- Confirm booking ---------- */
+      function onConfirmBooking() {
+        if (!state.date || !state.time || state.selectedSeats.length === 0)
+          return;
 
-      // Save for bill.php (keys expected by your bill page)
-      localStorage.setItem('bookingUser', JSON.stringify(state.user));
-      localStorage.setItem('selectedDate', state.date);
-      localStorage.setItem('selectedTime', state.time);
-      localStorage.setItem('selectedSeats', JSON.stringify(state.selectedSeats));
-      // selectedMovieName / selectedMoviePrice already set on home page
+        // double-check race with already-booked seats
+        const booked = getBookedSeats(
+          state.date,
+          state.time,
+          state.movie.name
+        ).map(String);
+        for (const s of state.selectedSeats) {
+          if (booked.includes(String(s))) {
+            alert(`Seat ${s} was just booked. Please reselect.`);
+            return renderSeats();
+          }
+        }
 
-      window.location.href = 'bill.php';
-    }
+        // persist seats for that show
+        const newBooked = [...booked, ...state.selectedSeats.map(String)].sort(
+          (a, b) => Number(a) - Number(b)
+        );
+        saveBookedSeats(state.date, state.time, state.movie.name, newBooked);
 
+        // Save for bill.php (keys expected by your bill page)
+        localStorage.setItem("bookingUser", JSON.stringify(state.user));
+        localStorage.setItem("selectedDate", state.date);
+        localStorage.setItem("selectedTime", state.time);
+        localStorage.setItem(
+          "selectedSeats",
+          JSON.stringify(state.selectedSeats)
+        );
+        // selectedMovieName / selectedMoviePrice already set on home page
 
-    // seat.html
-    // window.onload = function () {
-    //   let bookedSeats = JSON.parse(localStorage.getItem("bookedSeats")) || [];
+        window.location.href = "bill.php";
+      }
 
-    //   bookedSeats.forEach(seatNum => {
-    //     let seatElement = document.querySelector(`.seat[data-seat="${seatNum}"]`);
-    //     if (seatElement) {
-    //       seatElement.classList.add("booked"); // red color
-    //     }
-    //   });
-    // };
+      // seat.html
+      // window.onload = function () {
+      //   let bookedSeats = JSON.parse(localStorage.getItem("bookedSeats")) || [];
 
+      //   bookedSeats.forEach(seatNum => {
+      //     let seatElement = document.querySelector(`.seat[data-seat="${seatNum}"]`);
+      //     if (seatElement) {
+      //       seatElement.classList.add("booked"); // red color
+      //     }
+      //   });
+      // };
+    </script>
 
-  </script>
-
-</body>
-
+    <script>
+      flatpickr("#date", {
+        dateFormat: "d-m-Y", // DD-MM-YYYY
+        defaultDate: "today", // Automatically show today's date
+        minDate: "today", // Disable past dates
+      });
+    </script>
+  </body>
 </html>

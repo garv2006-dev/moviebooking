@@ -10,35 +10,66 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// ===== Handle Add Movie Request =====
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['price'], $_FILES['image'])) {
-    $name = $_POST['name'];
-    $price = $_POST['price'];
-
+// ===== Handle Add/Update Movie Request =====
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['name'], $_POST['price'])) {
+    $name = $conn->real_escape_string($_POST['name']);
+    $price = floatval($_POST['price']);
+    $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
+    
     // Handle Image Upload
-    $targetDir = "uploads/";
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0777, true);
+    $imagePath = isset($_POST['oldImage']) ? $_POST['oldImage'] : '';
+    
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+        $targetDir = "uploads/";
+        if (!is_dir($targetDir)) {
+            mkdir($targetDir, 0777, true);
+        }
+        
+        // Generate unique filename
+        $fileExt = strtolower(pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION));
+        $fileName = uniqid() . '.' . $fileExt;
+        $targetFile = $targetDir . $fileName;
+        
+        // Move uploaded file
+        if (move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile)) {
+            $imagePath = $targetFile;
+            
+            // Delete old image if it exists and is not the default
+            if (!empty($_POST['oldImage']) && file_exists($_POST['oldImage'])) {
+                @unlink($_POST['oldImage']);
+            }
+        }
     }
-    $targetFile = $targetDir . basename($_FILES["image"]["name"]);
-    move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile);
-
-    // Insert into DB
-    $sql = "INSERT INTO movies (name, price, image) VALUES ('$name', '$price', '$targetFile')";
-    if ($conn->query($sql) === TRUE) {
-        // --- IMPORTANT: Stop PHP execution after script output ---
-        echo "<script>
-                alert('Movie Added Successfully!');
-                window.location.href='admin.php';
-              </script>";
-        exit;
+    
+    if ($id > 0) {
+        // Update existing movie
+        if (!empty($imagePath)) {
+            $sql = "UPDATE movies SET name='$name', price=$price, image='$imagePath' WHERE id=$id";
+        } else {
+            $sql = "UPDATE movies SET name='$name', price=$price WHERE id=$id";
+        }
+        $successMessage = 'Movie updated successfully';
     } else {
-        echo "<script>
-                alert('Error: " . $conn->error . "');
-                window.location.href='admin.php';
-              </script>";
-        exit;
+        // Insert new movie
+        if (empty($imagePath)) {
+            $imagePath = 'uploads/default_movie.jpg';
+        }
+        $sql = "INSERT INTO movies (name, price, image) VALUES ('$name', $price, '$imagePath')";
+        $successMessage = 'Movie added successfully';
     }
+    
+    if ($conn->query($sql) === TRUE) {
+        $response = ['status' => 'success', 'message' => $successMessage];
+    } else {
+        $response = ['status' => 'error', 'message' => 'Error: ' . $conn->error];
+    }
+    // Ensure no output before this point
+    if (ob_get_level()) {
+        ob_clean();
+    }
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit;
 }
 
 // ===== Handle Fetch Movies Request =====
@@ -148,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
                 <th>Price (₹)</th>
                 <th>Edit</th>
                 <th>Delete</th>
-                <th>Viwe</th>
+                <th>View</th>
             </tr>
         </thead>
         <tbody id="movieList"></tbody>
@@ -175,6 +206,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
             }
         });
 
+        // Clear Form
+        function clearForm() {
+            movieForm.reset();
+            moviePreview.style.display = "none";
+            document.getElementById("movieId").value = "";
+            document.getElementById("oldImage").value = "";
+        }
+        
         // Show Add Form
         function showAddForm() {
             clearForm();
@@ -186,15 +225,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
         // Save Movie (Add or Update)
         movieForm.addEventListener("submit", function(e) {
             e.preventDefault();
+            
+            // Basic validation
+            const movieName = document.getElementById("movieName").value.trim();
+            const moviePrice = document.getElementById("moviePrice").value;
+            const movieId = document.getElementById("movieId").value;
+            
+            if (!movieName) {
+                alert('Please enter a movie name');
+                return;
+            }
+            
+            if (!moviePrice || parseFloat(moviePrice) <= 0) {
+                alert('Please enter a valid price');
+                return;
+            }
+            
+            // If it's an add operation and no image is selected
+            if (!movieId && !movieImage.files.length && !document.getElementById("oldImage").value) {
+                alert('Please select a movie poster');
+                return;
+            }
+            
             const formData = new FormData(movieForm);
-            fetch("", { method: "POST", body: formData })
-                .then(res => res.text())
-                .then(msg => {
-                    alert(msg);
-                    clearForm();
-                    formSection.style.display = "none";
+            fetch("", { 
+                method: "POST", 
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return res.json();
+            })
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
                     renderMovies();
-                });
+                    // resetForm();
+                    // Reset form title
+                    document.getElementById('formTitle').textContent = 'Add Movie';
+                    document.getElementById('movieForm').reset();
+                    moviePreview.src = '';
+                    moviePreview.style.display = 'none';
+                    document.getElementById('submitBtn').textContent = 'Add Movie';
+                    document.getElementById('cancelBtn').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+               // alert('An error occurred. Please try again.');
+            });
         });
 
         // Fetch Movies
@@ -236,9 +320,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'], $_POST['name'],
                 .then(res => res.json())
                 .then(movies => {
                     const movie = movies.find(m => m.id == id);
-                    if (!movie) return;
+                    if (!movie) {
+                        alert('Movie not found');
+                        return;
+                    }
                     document.getElementById("movieId").value = movie.id;
+                    document.getElementById("movieName").value = movie.name;
+                    document.getElementById("moviePrice").value = movie.price;
                     document.getElementById("oldImage").value = movie.image;
+                    
+                    // Show the form
+                    formTitle.textContent = "Edit Movie";
+                    saveBtn.textContent = "Update Movie";
+                    formSection.style.display = "block";
+                    
+                    // Show existing image if available
+                    if (movie.image) {
+                        moviePreview.src = movie.image;
+                        moviePreview.style.display = "block";
+                    }
                     document.getElementById("movieName").value = movie.name;
                     document.getElementById("moviePrice").value = movie.price;
                     moviePreview.src = movie.image;

@@ -34,9 +34,9 @@
           <span>CineBook</span>
         </div>
         <ul class="nav-links">
-          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="index.html">Home</a></li>
           <li><a href="offer.php">Offers</a></li>
-          <li><a href="contact.php">Contact</a></li>
+          <li><a href="contact.php" class="active">Contact</a></li>
             <li><a href="booking.html">my booking</a></li>
         </ul>
         <div class="auth-buttons">

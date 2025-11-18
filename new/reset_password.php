@@ -51,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <a href="index.php">Go to Login</a>
     <?php else: ?>
         <form method="post">
-            <input type="password" name="new_password" placeholder="Enter new password" required>
-            <input type="password" name="confirm_password" placeholder="Confirm new password" required>
+            <input type="password" name="new_password" placeholder="Enter new password" maxlength="8" minlength="6" required>
+            <input type="password" name="confirm_password" placeholder="Confirm new password" maxlength="8" minlength="6" required>
             <button type="submit">Reset Password</button>
         </form>
         <?php if (isset($error)) { echo "<p style='color:red; margin-top:10px;'>$error</p>"; } ?>

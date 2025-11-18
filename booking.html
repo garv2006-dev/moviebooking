@@ -113,15 +113,13 @@ function cancelBooking(index) {
   bookings[index].cancelled = true;
   localStorage.setItem("bookings", JSON.stringify(bookings));
 
-  // Free seats
-  let bookedSeats = JSON.parse(localStorage.getItem("bookedSeats")) || {};
-  let key = `${booking.movie}_${booking.cinema}_${booking.date}_${booking.time}`;
-  if (bookedSeats[key]) {
-    booking.seats.forEach(seat => {
-      bookedSeats[key] = bookedSeats[key].filter(s => s !== seat);
-    });
-    localStorage.setItem("bookedSeats", JSON.stringify(bookedSeats));
-  }
+  // ✅ Free seats from NEW system (showKey)
+  let showKey = `booking__${booking.movie.replace(/\s+/g, "_")}__${booking.date}__${booking.time.replace(/[:\s]+/g, "")}`;
+  let booked = JSON.parse(localStorage.getItem(showKey)) || [];
+  booking.seats.forEach(seat => {
+    booked = booked.filter(s => String(s) !== String(seat));
+  });
+  localStorage.setItem(showKey, JSON.stringify(booked));
 
   alert("Booking cancelled successfully ✅");
   loadBookings();
